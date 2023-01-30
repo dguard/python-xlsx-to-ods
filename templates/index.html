@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload File</title>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function (e) {
+            $('#upload').on('click', function () {
+                $('#msg').html('');
+                let form_data = new FormData();
+                let ins = document.querySelector('#multiFiles').files.length;
+
+                if (ins == 0) {
+                    $('#msg').html('<span style="color:red">excelもしくは.pptxファイルを選んでください。</span>')
+                    return;
+                }
+
+                for (let i = 0; i < ins; i++) {
+                    form_data.append('files[]', document.getElementById('multiFiles').files[i]);
+                }
+
+                $.ajax({
+                    url: '/upload',
+                    dataType: 'json',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    data: form_data,
+                    type: 'post',
+                    success: function (response) {
+                        $('#msg').html('');
+                        $.each(response, function (key, data) {
+                            if (key != 'message') {
+                                $('#msg').append('<span style="color:red">excelもしくは.pptxファイルを選んでください。</span>');
+                            } else {
+                                $('#msg').append(data + '<br>');
+                            }
+                        })
+                    },
+                    error: function (response) {
+                        $('#msg').html(response.message);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <h2>Python flask files upload - select files to upload</h2>
+
+    <dl>
+        <p>
+        <p id="msg" style="color: red;"></p>
+        <input type="file" id="multiFiles" name="files[]"/>
+        <button id="upload">Upload</button>
+        </p>
+    </dl>
+</body>
+
+</html>
