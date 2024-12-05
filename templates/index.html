@@ -7,7 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload File</title>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script type="text/javascript">
+
+<iframe id="my_iframe" style="display:none;"></iframe>
+<script>
+function Download(url) {
+    document.getElementById('my_iframe').src = url;
+};
         $(document).ready(function (e) {
             $('#upload').on('click', function () {
                 $('#msg').html('');
@@ -22,7 +27,6 @@
                 for (let i = 0; i < ins; i++) {
                     form_data.append('files[]', document.getElementById('multiFiles').files[i]);
                 }
-
                 $.ajax({
                     url: '/upload',
                     dataType: 'json',
@@ -32,6 +36,8 @@
                     data: form_data,
                     type: 'post',
                     success: function (response) {
+			console.log(response)
+			alert("sample")
                         $('#msg').html('');
                         $.each(response, function (key, data) {
                             if (key != 'message') {
@@ -40,8 +46,12 @@
                                 $('#msg').append(data + '<br>');
                             }
                         })
+			alert("sample")
                     },
                     error: function (response) {
+			let filename = document.querySelector('#multiFiles').files[0].name
+                        Download("/static/uploads/" + [filename.split('.')[0], 'ods'].join('.'))
+                   
                         $('#msg').html(response.message);
                     }
                 });

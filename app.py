@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 import os
 
@@ -19,6 +19,10 @@ def allowed_file(filename):
 def index():
     return render_template('index.html')
 
+@app.route('/uploads/<path:filename>', methods=['GET', 'POST'])
+def download(filename):
+    return send_from_directory(directory='uploads', filename=filename)
+
 @app.route('/upload', methods=['POST'])
 def load_file():
     print(request.files)
@@ -32,9 +36,26 @@ def load_file():
         print('That file extension is not allowed')
         return jsonify({'error': 'That file extension is not allowed!'})
     else:
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return redirect('/')
+        print("sample")
+        print(file.filename)
+        filename = file.filename # secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        from flask import Flask, make_response, send_file
+        from pyexcel_ods3 import save_data
+        from pyexcel_xlsx import get_data
+        file_path = "/".join([os.path.dirname(os.path.realpath(__file__)), file_path])
+        print(file_path)
+
+        data = get_data(file_path)
+        file_path = ".".join([file_path.split(".")[0], "ods"])
+        print("filepath", file_path)
+
+        save_data(file_path, data)
+        return send_file(file_path, as_attachment=True)
+        return jsonify({'success': 'Saved file'})
+        #return redirect('/')
 
 
 if __name__ == '__main__':
