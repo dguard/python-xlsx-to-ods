@@ -9,8 +9,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app.secret_key = 'calkjsdlkjfqer'
 app.config['MAX_CONTENT_LENGTH'] = 16*1024*1024
+# app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-ALLOWED_EXTENSIONS = set(['xls', 'xlsx', 'pptx'])
+ALLOWED_EXTENSIONS = set(['xlsx'])
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -23,14 +24,31 @@ def index():
 def download(filename):
     return send_from_directory(directory='uploads', filename=filename)
 
+def sorted_directory(directory):
+    def get_creation_time(entry):
+        return entry.stat().st_ctime
+
+    with os.scandir(directory) as entries:
+        sorted_entries = sorted(entries, key=get_creation_time)
+        sorted_items = [entry.name for entry in sorted_entries]
+    return sorted_items
+
+
 @app.route('/upload', methods=['POST'])
 def load_file():
-    print(request.files)
     if 'files[]' not in request.files:
         resp = jsonify({'message': 'No file part in the request'})
         resp.status_code = 400
         return resp
     file = request.files.getlist('files[]')[0]
+    sorted_files = sorted_directory(app.config['UPLOAD_FOLDER'])
+
+    # delete 10 of 20 old files
+    if len(sorted_files) > 20:
+      for filename in sorted_directory(app.config['UPLOAD_FOLDER'])[:11]:
+        if filename != '.DS_Store':
+          print("remove old file ", filename)
+          os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
     if not allowed_file(file.filename):
         print('That file extension is not allowed')
@@ -54,7 +72,7 @@ def load_file():
 
         save_data(file_path, data)
         return send_file(file_path, as_attachment=True)
-        return jsonify({'success': 'Saved file'})
+        #return jsonify({'success': 'Saved file'})
         #return redirect('/')
 
 
