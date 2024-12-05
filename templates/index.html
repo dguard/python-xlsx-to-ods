@@ -28,7 +28,7 @@ function Download(url) {
                     form_data.append('files[]', document.getElementById('multiFiles').files[i]);
                 }
                 $.ajax({
-                    url: '/upload',
+                    url: 'http://localhost:5000/upload',
                     dataType: 'json',
                     cache: false,
                     contentType: false,
@@ -50,7 +50,7 @@ function Download(url) {
                     },
                     error: function (response) {
 			let filename = document.querySelector('#multiFiles').files[0].name
-                        Download("/static/uploads/" + [filename.split('.')[0], 'ods'].join('.'))
+                        Download(`http://localhost:5000` + "/static/uploads/" + [filename.split('.')[0], 'ods'].join('.'))
                    
                         $('#msg').html(response.message);
                     }
