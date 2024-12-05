@@ -25,6 +25,8 @@ server: `flask --app app run`
 
 - Contributor: [Alexander Serditov](https://cv.digitallyconstructed.ru/)
 
+- Original Author: [kohama1988](https://github.com/kohama1988/flaskUploadFileAjax)
+
 ## License
 
   [MIT license](LICENSE)
